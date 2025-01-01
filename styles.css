@@ -30,6 +30,14 @@ main {
 
 section {
   margin: 2rem 0;
+  #contact a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  #contact a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
 }
 
 .project {
@@ -46,4 +54,12 @@ footer {
   text-align: center;
   padding: 1rem;
   margin-top: 2rem;
+  #footer a {
+    color: #007bff;
+    text-decoration: none;  
+  }
+  #footer a:hover {
+    color: #0056b3;  /* Hover color */
+    text-decoration: underline;  /* Underline on hover */
+  }
 }
