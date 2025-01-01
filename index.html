@@ -44,73 +44,103 @@
         <div class="project">
           <h2>Random Password Generator & Sorter</h2>
           <br>
-            This project allows a user to input two variables, X & Y, to
-            determine the length and amount of passwords to generate,
-            respectively. It prints out all passwords generated both naturally
-            and via Radix Sort.<br> (NOTICE: While Radix Sort is one of the
-            fastest methods available, its only purpose here is to improve
-            generation of larger quantities. 500k+)</br>
+          This script generates a specified number of random passwords using parallel processing to speed up the creation process. It sorts the generated passwords using Python's efficient Timsort algorithm and measures the total time for the operation. By running multiple iterations and averaging the results, it calculates the average time taken for the entire process and estimates the time per password. This approach combines parallel password generation, optimized sorting, and performance measurement to handle large datasets efficiently.</br>
           </p>
           <div class="code-display">
             <h4>Python Script:</h4>
             <pre><code class="language-python">
-import random
-import string
-
-# Function to generate random passwords       
-def generate_passwords(length, amount):
-    pool = string.ascii_letters + string.digits  # A-Z, a-z, 0-9
-    passwords = []
-    for _ in range(amount):
-        password = ''.join(random.choice(pool) for _ in range(length))
-        passwords.append(password)
-    return passwords
-
-# Radix Sort Function         
-def radix_sort(passwords, length):
-    pool = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    char_to_index = {char: index for index, char in enumerate(pool)}
-
-    for position in range(length - 1, -1, -1):
-        buckets = [[] for _ in range(62)]
-
-        for password in passwords:
-            char = password[position]
-            index = char_to_index[char]
-            buckets[index].append(password)
-
-        passwords = []
-        for bucket in buckets:
-            passwords.extend(bucket)
-
-    return passwords
-
-# Main function to handle input and output
-def main():
-    # Combined input for length and amount
-    length, amount = map(int, input(
-        "Enter the length and amount of passwords (e.g., 16 1000): ").split())
-
-    # Generate random passwords
-    passwords = generate_passwords(length, amount)
-
-    print("\nGenerated Passwords:")
-    for password in passwords:
-        print(password)
-
-    # Sort the passwords using Radix Sort
-    sorted_passwords = radix_sort(passwords, length)
-
-    print("\nSorted Passwords:")
-    for password in sorted_passwords:
-        print(password)
-
-if __name__ == "__main__":
-    main()
+              import random
+              import string
+              import time
+              import multiprocessing
+              
+              # Function to generate random passwords
+              
+              
+              def generate_passwords(length, amount):
+                  pool = string.ascii_letters + string.digits  # A-Z, a-z, 0-9
+                  passwords = []
+                  for _ in range(amount):
+                      password = ''.join(random.choice(pool) for _ in range(length))
+                      passwords.append(password)
+                  return passwords
+              
+              # Parallel generation of passwords
+              
+              
+              def parallel_generate_passwords(length, amount, num_processes):
+                  # Divide the amount of passwords to generate across the number of processes
+                  chunk_size = amount // num_processes
+                  with multiprocessing.Pool(processes=num_processes) as pool:
+                      result = pool.starmap(generate_passwords, [
+                                            (length, chunk_size)] * num_processes)
+                  # Flatten the list of results
+                  return [password for sublist in result for password in sublist]
+              
+              # Sort the passwords (Timsort)
+              
+              
+              def timsort(passwords):
+                  # Sorting based on natural order
+                  return sorted(passwords, key=lambda x: (x, x))
+              
+              # Main function to handle input and output
+              
+              
+              def main():
+                  # Input for length and amount
+                  length, amount = map(int, input(
+                      "Enter the length and amount of passwords (e.g., 16 1000): ").split())
+                  # Using the number of CPU cores available
+                  num_processes = multiprocessing.cpu_count()
+              
+                  # Measure the time taken for multiple iterations for more stable results
+                  num_iterations = 10
+                  execution_times = []
+              
+                  for _ in range(num_iterations):
+                      start_time = time.time()
+              
+                      # Generate passwords in parallel
+                      passwords = parallel_generate_passwords(length, amount, num_processes)
+              
+                      # Sort the passwords using Timsort
+                      sorted_passwords = timsort(passwords)
+              
+                      end_time = time.time()
+                      execution_times.append(end_time - start_time)
+              
+                  # Calculate the average execution time
+                  total_time = sum(execution_times)
+                  avg_time = total_time / num_iterations
+                  avg_time_per_password = avg_time / amount
+              
+                  print(f"\nAverage Time for {num_iterations} runs: {avg_time:.4f} seconds")
+                  print(f"Approximate time per password: {
+                        avg_time_per_password:.8f} seconds")
+              
+              
+              if __name__ == "__main__":
+                  main()
+              
             </code></pre>
           </div>
           <div class="output-display">
-            <p>Output of the program will be displayed here.</p>
+            <h4>Enter the password details:</h4>
+            <label for="password-length">Password Length:</label>
+            <input type="number" id="password-length" value="16" /><br />
+            <label for="password-amount">Number of Passwords:</label>
+            <input type="number" id="password-amount" value="100" /><br />
+            <button onclick="generateAndSort()">Generate & Sort Passwords</button>
+            <br />
+            <h4>Sample Generated Passwords:</h4>
+            <pre id="generated-passwords"></pre>
+            <h4>Sample Sorted Passwords:</h4>
+            <pre id="sorted-passwords"></pre>
+            <h4>Average Time:</h4>
+            <p id="avg-time"></p>
+            <h4>Approximate Time Per Password:</h4>
+            <p id="time-per-password"></p>
           </div>
         </div>
         <div class="project">
@@ -146,7 +176,48 @@ if __name__ == "__main__":
       <p>&copy; 2024 | Name</p>
       <a href="#top">Back to Top</a>
     </footer>
-    <!-- External JS File -->
+    <script>
+      // Simulate password generation and sorting with Timsort
+      function generatePasswords(length, amount) {
+        const pool = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let passwords = [];
+        for (let i = 0; i < amount; i++) {
+          let password = '';
+          for (let j = 0; j < length; j++) {
+            password += pool.charAt(Math.floor(Math.random() * pool.length));
+          }
+          passwords.push(password);
+        }
+        return passwords;
+      }
+
+      function timsort(passwords) {
+        return passwords.slice().sort(); // Sorting a copy of the passwords array to keep the original intact
+      }
+
+      function generateAndSort() {
+        const length = parseInt(document.getElementById("password-length").value);
+        const amount = parseInt(document.getElementById("password-amount").value);
+
+        const startTime = performance.now();
+
+        // Generate passwords
+        const passwords = generatePasswords(length, amount);
+
+        // Sort passwords using Timsort (native JavaScript sort)
+        const sortedPasswords = timsort(passwords);
+
+        const endTime = performance.now();
+        const totalTime = endTime - startTime;
+        const avgTime = totalTime / amount; // Average time per password
+
+        // Display the results
+        document.getElementById("generated-passwords").textContent = passwords.slice(0, 10).join("\n");  // Show first 10 generated passwords
+        document.getElementById("sorted-passwords").textContent = sortedPasswords.slice(0, 10).join("\n"); // Show first 10 sorted passwords
+        document.getElementById("avg-time").textContent = `${(totalTime / 1000).toFixed(3)} seconds`;
+        document.getElementById("time-per-password").textContent = `${(avgTime / 1000).toFixed(6)} seconds per password`;
+      }
+    </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <script src="assets/scripts/script.js"></script>
     <script>
