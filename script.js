@@ -1,11 +1,21 @@
-// Replace with your actual birth year
-const birthYear = 1996;
+// Set your exact Date of Birth (DOB)
+const birthDate = new Date('1996-10-25'); // Example: YYYY-MM-DD
 
+// Function to calculate the age based on DOB
 function calculateAge() {
-  const currentYear = new Date().getFullYear(); // Get the current year
-  const age = currentYear - birthYear; // Calculate the age
+  const currentDate = new Date(); // Get the current date
+  let age = currentDate.getFullYear() - birthDate.getFullYear(); // Initial age calculation
+
+  // Adjust age if birthday hasn't occurred yet this year
+  const monthDifference = currentDate.getMonth() - birthDate.getMonth();
+  const dayDifference = currentDate.getDate() - birthDate.getDate();
+
+  if (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)) {
+    age--; // Decrease age if birthday hasn't happened yet this year
+  }
+
   return age;
 }
 
-// Update the HTML element with the calculated age
+// Update the element with the id "age" with the calculated age
 document.getElementById("age").textContent = calculateAge();
