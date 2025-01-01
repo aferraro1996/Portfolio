@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Portfolio</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
   </head>
   <body>
     <header>
@@ -25,6 +26,28 @@
         <div class="project">
           <h3>Random Password Generator & Sorter</h3>
           <p>This project allows a user to input 2 variables, X & Y, to determine the length and amount of passwords to generate, respectively. <br>It prints out all passwords generated, as well as printing them in Radix Sort.</br></p>
+
+          <h4>Python Script:</h4>
+        <pre><code class="language-python">
+import random
+import string
+
+def generate_passwords(length, amount):
+    pool = string.ascii_letters + string.digits
+    passwords = [''.join(random.choice(pool) for _ in range(length)) for _ in range(amount)]
+    return passwords
+
+def radix_sort(passwords, length):
+    pool = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    char_to_index = {char: index for index, char in enumerate(pool)}
+    for position in range(length - 1, -1, -1):
+        buckets = [[] for _ in range(62)]
+        for password in passwords:
+            index = char_to_index[password[position]]
+            buckets[index].append(password)
+        passwords = [password for bucket in buckets for password in bucket]
+    return passwords
+        </code></pre>
         </div>
         <div class="project">
           <h3>Project 2</h3>
@@ -42,5 +65,7 @@
     <footer>
       <p>&copy; 2024 My Portfolio</p>
     </footer>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
   </body>
 </html>
